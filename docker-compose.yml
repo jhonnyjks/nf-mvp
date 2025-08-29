@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: cs-mvp-api-prod
+    container_name: nf-mvp-jhonny-mesquita-api-prod
     ports:
       - "8000:8000"
     volumes:

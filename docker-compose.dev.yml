@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: cs-mvp-api-dev
+    container_name: nf-mvp-jhonny-mesquita-api-dev
     ports:
       - "8000:8000"
     volumes:
@@ -22,11 +22,11 @@ services:
       - db
   db:
     image: mariadb:10.11.13
-    container_name: cs-mvp-db-dev
+    container_name: nf-mvp-jhonny-mesquita-db-dev
     restart: always
     command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
     environment:
-      MARIADB_DATABASE: "cs-mvp"
+      MARIADB_DATABASE: "nf-mvp-jhonny-mesquita"
       MARIADB_ROOT_PASSWORD: "123"
     ports:
       - "3307:3306"
@@ -35,7 +35,7 @@ services:
       - ./database/db.sql:/docker-entrypoint-initdb.d/db.sql
   phpmyadmin:
     image: phpmyadmin:5-apache
-    container_name: cs-mvp-phpmyadmin-dev
+    container_name: nf-mvp-jhonny-mesquita-phpmyadmin-dev
     restart: always
     ports:
       - "8080:80"
