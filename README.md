@@ -27,7 +27,9 @@
  ```
 
 ## Instruções de instalação
-- **0** Esse projeto é completo. Ter o git e docker instalados é o único requisito;
+- **0** Requisitos para pleno funcionamento
+  - 0.1 Ter o git e docker instalados;
+  - 0.2 Setar a OPENAI_API_KEY em '.env.example' antes de rodar os comandos abaixo, necessário para OpenIA
 
 - **1** Clonar este repositório e entrar no diretório que foi criado na clonagem:
 
