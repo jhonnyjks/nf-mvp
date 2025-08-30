@@ -1,5 +1,5 @@
 services:
-  app:
+  api:
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -36,7 +36,7 @@ services:
       - ./database/db.sql:/docker-entrypoint-initdb.d/db.sql
       - ./database/n8n-init.sql:/docker-entrypoint-initdb.d/02-n8n.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p123"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p123" ]
       interval: 3s
       timeout: 3s
       retries: 50
@@ -71,12 +71,19 @@ services:
       DB_MYSQLDB_DATABASE: n8n
       DB_MYSQLDB_USER: n8n
       DB_MYSQLDB_PASSWORD: n8n123
-      N8N_ENCRYPTION_KEY: 123456789012345678901234567890
+      N8N_ENCRYPTION_KEY: 1.2345678901234568e+29
     volumes:
       - n8n_data:/home/node/.n8n
     depends_on:
       db:
         condition: service_healthy
+  client:
+    extends:
+      file: ./client/docker-compose.yml
+      service: client
+    depends_on:
+      api:
+        condition: service_started
 volumes:
   mariadb_data:
   n8n_data:

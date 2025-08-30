@@ -1,0 +1,18 @@
+services:
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nf-mvp-jhonny-mesquita-client-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: >
+      sh -c "if [ ! -f .env.development ]; then cp .env.development.example .env.development; fi && \
+        npm start"
+    stdin_open: true
+    tty: true
