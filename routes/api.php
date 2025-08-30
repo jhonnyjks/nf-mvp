@@ -194,6 +194,4 @@ Route::resource('email_templates', 'EmailTemplateAPIController');
 
 Route::resource('audits', 'AuditAPIController');
 
-Route::get('/cors-test', function () {
-    return response()->json(['ok' => true]);
-});
+Route::resource('invoices', 'InvoiceAPIController');

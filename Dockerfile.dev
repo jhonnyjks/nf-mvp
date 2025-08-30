@@ -5,8 +5,8 @@ RUN apt-get update && apt-get install -y \
     unzip zip curl libpng-dev libonig-dev libxml2-dev libzip-dev libsqlite3-dev \
     libldap2-dev mariadb-client \
     && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip xml gd ldap
-    # && apt install -y tesseract-ocr libtesseract-dev tesseract-ocr-eng tesseract-ocr-por
+    && docker-php-ext-install pdo pdo_mysql mbstring zip xml gd ldap \
+    && apt install -y tesseract-ocr libtesseract-dev tesseract-ocr-eng tesseract-ocr-por
 
 # Instalar Xdebug
 RUN pecl install xdebug-3.4.4 && docker-php-ext-enable xdebug

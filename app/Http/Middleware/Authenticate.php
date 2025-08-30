@@ -27,6 +27,7 @@ class Authenticate extends Middleware
         'migrate-users', 
         'start-migration',
         'migration-status',
+        'invoices'
 
     ];
 
