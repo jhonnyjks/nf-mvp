@@ -40,4 +40,9 @@ return [
         ],
     ],
 
+    'n8n' => [
+        'url'   => env('N8N_URL', 'http://n8n:5678'),
+        'token' => env('N8N_WEBHOOK_TOKEN'),
+    ],
+
 ];

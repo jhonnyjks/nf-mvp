@@ -31,6 +31,9 @@ Projeto base para desenvolvimento ágil de APIs em PHP com Laravel. O gerador é
   - **MariaDB (Banco de dados):** localhost:3307
     - user: root
     - pass: 123
+  - **N8N:** http://localhost:5678
+    - user: jhonnyjks@gmail.com
+    - pass: 12345678aS
   - Utilizar IP bridge caso localhost não acesse: 172.17.0.1
 - **5** [opcional] Preparar o App Client React, já integrado a esta API:
 

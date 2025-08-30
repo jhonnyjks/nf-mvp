@@ -19,20 +19,27 @@ services:
         chmod 600 storage/oauth-private.key storage/oauth-public.key; fi && \
         php artisan serve --host=0.0.0.0 --port=8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
-    image: mariadb:10.11.13
+    image: mysql:8.0
     container_name: nf-mvp-jhonny-mesquita-db-dev
     restart: always
-    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    command: [ "mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci" ]
     environment:
-      MARIADB_DATABASE: "nf-mvp-jhonny-mesquita"
-      MARIADB_ROOT_PASSWORD: "123"
+      MYSQL_DATABASE: "nf-mvp-jhonny-mesquita"
+      MYSQL_ROOT_PASSWORD: "123"
     ports:
       - "3307:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./database/db.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./database/n8n-init.sql:/docker-entrypoint-initdb.d/02-n8n.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p123"]
+      interval: 3s
+      timeout: 3s
+      retries: 50
   phpmyadmin:
     image: phpmyadmin:5-apache
     container_name: nf-mvp-jhonny-mesquita-phpmyadmin-dev
@@ -46,6 +53,30 @@ services:
       PMA_ARBITRARY: 1
       UPLOAD_LIMIT: 256M
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+  n8n:
+    image: n8nio/n8n:latest
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      GENERIC_TIMEZONE: America/Fortaleza
+      DB_TYPE: mysqldb
+      DB_MYSQLDB_HOST: db
+      DB_MYSQLDB_PORT: 3306
+      DB_MYSQLDB_DATABASE: n8n
+      DB_MYSQLDB_USER: n8n
+      DB_MYSQLDB_PASSWORD: n8n123
+      N8N_ENCRYPTION_KEY: 123456789012345678901234567890
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      db:
+        condition: service_healthy
 volumes:
   mariadb_data:
+  n8n_data:

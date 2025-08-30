@@ -342,7 +342,7 @@ class InvoiceRepository extends BaseRepository
                 }
             }
 
-            return Invoice::create([
+            $newInvoice =  Invoice::create([
                 'content' => $nota,
                 'description' => $descricao,
                 'user_id' => auth()->id(),
@@ -350,8 +350,20 @@ class InvoiceRepository extends BaseRepository
                 'categories' => $categoria
             ]);
 
+            if($newInvoice) {
+                // Envia email notificando nova nota cadastrada
+                try {
+                    $mailer = new \App\Services\N8nMailer();
+                    $mailer->send([
+                        'text'    => "Uma nova nota fiscal foi cadastrada.\n\n--- Nota: --- \n$nota\n\n--- Descrição: ---\n$descricao\n\n--- Categoria Sugerida: ---\n$categoria\n\n--- Resumo:  ---\n$resumo\n\nAcesse o sistema para mais detalhes."
+                    ]);
+                } catch (\Exception $e) {
+                    // Loga o erro, mas não impede o fluxo principal
+                    \Log::error('Erro ao enviar email de notificação: ' . $e->getMessage());
+                }
+            }
 
-            return null;
+            return $newInvoice;
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             // Erros 4xx da OpenAI
             $body = (string) $e->getResponse()->getBody();
