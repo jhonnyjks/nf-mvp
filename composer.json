@@ -15,6 +15,7 @@
         "doctrine/dbal": "~2.10",
         "fakerphp/faker": "^1.21",
         "flowjs/flow-php-server": "^1.0",
+        "guzzlehttp/guzzle": "^7.9",
         "ilovepdf/ilovepdf-php": "^1.1",
         "infyomlabs/laravel-generator": "^6.0",
         "infyomlabs/laravel-ui-adminlte": "^5.0",

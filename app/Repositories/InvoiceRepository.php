@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Invoice;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\Storage;
+use GuzzleHttp\Client;
 
 /**
  * Class InvoiceRepository
@@ -18,6 +19,7 @@ class InvoiceRepository extends BaseRepository
      * @var array
      */
     protected $fieldSearchable = [
+        'content',
         'description',
         'categories',
         'resume',
@@ -64,18 +66,10 @@ class InvoiceRepository extends BaseRepository
                 return null;
             }
 
-
-            // se quiser vincular ao invoice no banco:
-            if (file_exists(storage_path('app/public/' . $path))) {
-                return Invoice::create([
-                    'description' => $ocrContent,
-                    'user_id' => auth()->id(),
-                    'resume' => $path,
-                    'categories' => 'Uncategorized'
-                ]);
-            }
+            return $this->categorize($ocrContent);
         } catch (\Exception $e) {
             throw $e;
+            return null;
         }
     }
 
@@ -239,5 +233,140 @@ class InvoiceRepository extends BaseRepository
     private function cleanHTTPHeaders($text)
     {
         return preg_replace('/HTTP.*?GMT\s+/s', '', $text);
+    }
+
+    public function categorize($nota)
+    {
+        // 1) Monta a chamada à Responses API
+        $client = new Client([
+            'base_uri' => config('openai.base_url', 'https://api.openai.com'),
+            'timeout'  => config('openai.timeout', 20),
+        ]);
+
+        // Schema JSON de saída para garantir formato estável
+        $jsonSchema = [
+            'name'   => 'nf_categ_resumo',
+            'type'                 => 'object',
+            'additionalProperties' => false,
+            'properties'           => [
+                'descricao' => [
+                    'type' => 'string',
+                    'minLength' => 3,
+                    'maxLength' => 200
+                ],
+                'categoria_sugerida' => [
+                    'type' => 'string',
+                    'minLength' => 3,
+                    'maxLength' => 48
+                ],
+                'resumo_cliente' => [
+                    'type'      => 'string',
+                    'minLength' => 3,
+                    'maxLength' => 64
+                ],
+            ],
+            'required' => ['descricao', 'categoria_sugerida', 'resumo_cliente'],
+        ];
+
+        $body = [
+            'model' => config('openai.model', 'gpt-4o-mini'),
+            'input' => [
+                [
+                    'role'    => 'system',
+                    'content' => [
+                        [
+                            'type' => 'input_text',
+                            'text' => implode("\n", [
+                                'Você é um classificador e redator curto em pt-BR.',
+                                'Tarefa:',
+                                '1) Dada a descrição livre de uma nota fiscal fictícia (itens comprados, quantidades, etc.);',
+                                '2) Retorne JSON válido com:',
+                                '   - descricao: descrição do que foi vendido e valor (<= 200 chars); Ex.: Venda de 10 canetas e 5 cadernos escolares; ',
+                                '   - categoria_sugerida: categoria principal da venda, como saúde, papelaria, escritório, informática, alimentação, serviços, ou outra percebida;',
+                                '   - resumo_cliente: frase amigável e curta (<= 64 chars) descrevendo a compra; Ex.: Compra de material escolar: canetas e cadernos;',
+                                'Regras:',
+                                '- Não invente itens não citados;',
+                                '- Se a descrição indicar vários domínios, escolha a categoria mais provável;',
+                                '- Sem emojis; tom neutro e profissional;',
+                                '- Informar quantidades apenas se possível, não inventar quantidade;'
+                            ]),
+                        ]
+                    ],
+                ],
+                [
+                    'role'    => 'user',
+                    'content' => [
+                        ['type' => 'input_text', 'text' => $nota]
+                    ],
+                ],
+            ],
+            // Pede JSON perfeitamente aderente ao schema
+            'text' => [
+                'format' => [
+                    'type'        => 'json_schema',
+                    'schema' => $jsonSchema,
+                    'name' => 'nf_categ_resumo'
+                ]
+            ]
+        ];
+
+        try {
+            $response = $client->post('v1/responses', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('openai.api_key'),
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => $body,
+            ]);
+
+            $payload = json_decode((string) $response->getBody(), true);
+
+            $categoria = null;
+            $resumo    = null;
+            $descricao = null;
+
+            // 2) Extrai resultado estruturado (quando o schema é respeitado)
+            if (isset($payload['output']) && is_array($payload['output'])) {
+                foreach ($payload['output'] as $output) {
+                    if (isset($output['content']) && is_array($output['content'])) {
+                        foreach ($output['content'] as $content) {
+                            if (!empty($content['text'])) {
+                                $textResult = json_decode($content['text'], true);
+                                $categoria = $textResult['categoria_sugerida'] ?? null;
+                                $resumo = $textResult['resumo_cliente'] ?? null;
+                                $descricao = $textResult['descricao'] ?? null;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Invoice::create([
+                'content' => $nota,
+                'description' => $descricao,
+                'user_id' => auth()->id(),
+                'resume' => $resumo,
+                'categories' => $categoria
+            ]);
+
+
+            return null;
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            // Erros 4xx da OpenAI
+            $body = (string) $e->getResponse()->getBody();
+            return [
+                'success'    => false,
+                'message' => 'Erro na chamada à OpenAI (4xx): ' . $e->getMessage(),
+                'info'  => $body,
+            ];
+        } catch (\Throwable $e) {
+            // Rede, timeout, etc.
+            return [
+                'success'    => false,
+                'message' => 'Falha inesperada ao acessar a OpenAI.',
+                'info'  => $e->getMessage(),
+            ];
+        }
     }
 }

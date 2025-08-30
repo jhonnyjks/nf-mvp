@@ -53,6 +53,7 @@ class Invoice extends Model
 
 
     public $fillable = [
+        'content',
         'description',
         'categories',
         'resume',
@@ -66,6 +67,7 @@ class Invoice extends Model
      */
     protected $casts = [
         'id' => 'integer',
+        'content' => 'string',
         'description' => 'string',
         'categories' => 'string',
         'resume' => 'string',

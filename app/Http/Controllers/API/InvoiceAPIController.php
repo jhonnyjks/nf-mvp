@@ -63,7 +63,7 @@ class InvoiceAPIController extends AppBaseController
     {
         $this->invoiceRepository->pushCriteria(new RequestCriteria($request));
         $this->invoiceRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $invoices = $this->invoiceRepository->all();
+        $invoices = $this->invoiceRepository->paginate(50);
 
         return $this->sendResponse($invoices->toArray(), 'Invoices retrieved successfully');
     }
@@ -120,6 +120,10 @@ class InvoiceAPIController extends AppBaseController
 
         if (empty($invoice)) {
             return $this->sendError('Invoice could not be created from the provided file');
+        }
+
+        if (empty($invoice->id)) {
+            return $this->sendError($invoice['info'] ?? '');
         }
 
         return $this->sendResponse($invoice->toArray(), 'Invoice saved successfully');
