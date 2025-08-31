@@ -53,7 +53,7 @@
        fi
    ```
 
-- **3** Buildar via docker (também serve para resetar estado):
+- **3** Buildar via docker. (Essa parte demora na primeira vez, vai baixar tudo que precisar):
 
   ```
   docker compose -f docker-compose.dev.yml build
