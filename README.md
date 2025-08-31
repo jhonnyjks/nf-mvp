@@ -13,14 +13,14 @@
 
 
 ## Processa imagem e PDF de nota fiscal:
- - 1 - Logar no WebApp http://localhost:3000 com usuário  'admin' e senha '123'
+ - 1 - Logar no WebApp http://localhost:3000 com usuário  'admin' e senha '123456'
  - 2 - Acessar menu 'Notas Fiscais' e clicar em 'SELECIONE UM ARQUIVO DE NOTA FISCAL (PDF, JPG, PNG, etc.):'
     - 2.1 - O arquivo será processado e serão extraídos os dados: Nota Completa, Descrição, Categorias, Resumo.
     - 2.2 - Dispara um gatilho webhook para o N8N, que dispara um email para jhonnyjks@gmail.com com todos os dados da nota. Altere esse email no N8N para testes.
  - 3 - Gestão de usuários no menu 'Usuários'.
     - 3.1 - Editar um usuário e atribuir a ele o perfil 'Cliente' para ter um cliente cadastrado e com acesso.
     - 3.2 - Todas as notas criadas ficarão relacionadas ao cliente criador.
- - 4 - Notas fiscais para testes
+ - 4 - Notas fiscais para testes.
  ```
  public/NF1.jpg
  public/NF2.png
@@ -68,14 +68,14 @@
   - **Cliente (WebApp)** O App deve estar acessível em:
     - http://localhost:3000
     - Login: admin
-    - Senha: 123
+    - Senha: 123456
   - **API (Restful):** http://localhost:8000/api/auth/login
     - user: admin
     - pass: 123
-  - **MySQLAdmin (Gestor WEB do Banco):** http://localhost:8080
+  - **MySQLAdmin (Gestor WEB do BD N8N e API):** http://localhost:8080
     - user: root
     - pass: 123
-  - **MariaDB (Banco de dados):** localhost:3307
+  - **MariaDB (Banco de dados do N8N e API):** localhost:3307
     - user: root
     - pass: 123
   - **N8N:** http://localhost:5678
