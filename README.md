@@ -40,7 +40,9 @@
 - **2** Setar a OPENAI_API_KEY em '.env.example'
   - **2.1** Abrir o arquivo .env.example na raiz do projeto
   - **2.2** Localizar a variável OPENAI_API_KEY e setar a chave que você pode obter em https://platform.openai.com/api-keys
+  - **NÃO PRECISA CRIAR .env**, isso ocorrerá automaticamente no build.
   - **2.3.** Comando pronto (opcional). Altere apenas o valor 'sk-coloque_sua_chave_aqui'
+    
     ```
     KEY="sk-coloque_sua_chave_aqui" \
     && FILE=".env.example" \
@@ -51,8 +53,6 @@
        fi
    ```
 
-  - **NÃO PRECISA CRIAR .env**, isso ocorrerá automaticamente no build.
-  
 - **3** Buildar via docker (também serve para resetar estado):
 
   ```
