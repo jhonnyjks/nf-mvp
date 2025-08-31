@@ -29,7 +29,7 @@
 ## Instruções de instalação
 - **0** Requisitos para pleno funcionamento
   - 0.1 Ter o git e docker instalados;
-  - 0.2 Setar a OPENAI_API_KEY em '.env.example' antes de rodar os comandos abaixo, necessário para OpenIA
+  - 0.2 Ter uma OPENAI_API_KEY, necessário para OpenIA
 
 - **1** Clonar este repositório e entrar no diretório que foi criado na clonagem:
 
@@ -37,17 +37,33 @@
   git clone https://github.com/jhonnyjks/nf-mvp.git
   cd nf-mvp
   ```
-- **2** Buildar via docker (também serve para resetar estado):
+- **2** Setar a OPENAI_API_KEY em '.env.example'
+  - **2.1** Abrir o arquivo .env.example na raiz do projeto
+  - **2.2** Localizar a variável OPENAI_API_KEY e setar a chave que você pode obter em https://platform.openai.com/api-keys
+  - **NÃO PRECISA CRIAR .env**, isso ocorrerá automaticamente no build.
+  - **2.3.** Comando pronto (opcional). Altere apenas o valor 'sk-coloque_sua_chave_aqui'
+    
+    ```
+    KEY="sk-coloque_sua_chave_aqui" \
+    && FILE=".env.example" \
+    && if grep -Eq '^[#[:space:]]*OPENAI_API_KEY=' "$FILE"; then \
+         sed -i.bak -E "s|^[#[:space:]]*OPENAI_API_KEY=.*|OPENAI_API_KEY=${KEY}|" "$FILE"; \
+       else \
+         printf '\nOPENAI_API_KEY=%s\n' "$KEY" >> "$FILE"; \
+       fi
+   ```
+
+- **3** Buildar via docker (também serve para resetar estado):
 
   ```
   docker compose -f docker-compose.dev.yml build
   ```
-- **3** Rodar via docker:
+- **4** Rodar via docker:
 
   ```
   docker compose -f docker-compose.dev.yml up
   ```
-- **4** Instâncias que devem estar acessíveis em ambiente dev:
+- **5** Instâncias que devem estar acessíveis em ambiente dev:
 
   - **Cliente (WebApp)** O App deve estar acessível em:
     - http://localhost:3000
@@ -67,7 +83,7 @@
     - pass: 12345678aS
   - Utilizar IP bridge caso localhost não acesse: 172.17.0.1
 
-- **5** Resetar banco de dados e projeto geral para estado inicial do repositório:
+- **6** Resetar banco de dados e projeto geral para estado inicial do repositório:
 
   ```
   docker compose -f docker-compose.dev.yml down -v
